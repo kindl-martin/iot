@@ -1,0 +1,28 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: 1234
+  iot:
+    build:
+      context: .
+      dockerfile: services/iot/Dockerfile
+    environment:
+      RABBITMQ_URL: amqp://admin:1234@rabbitmq:5672
+    depends_on:
+      - rabbitmq
+
+  consumer:
+    build:
+      context: .
+      dockerfile: services/consumer/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      RABBITMQ_URL: amqp://admin:1234@rabbitmq:5672
+    depends_on:
+      - rabbitmq
